@@ -1,0 +1,19 @@
+# Setup input/output
+source($in_gds)
+schematic($in_netlist)
+report($out_lvs_report)
+
+# 1. Define Connectivity (The "Stack")
+# -----------------------------------
+# Connect layers through vias
+connect(input(1, 0), input(5, 0)) # Example: Active to Poly (simplified)
+connect(input(8, 0), input(10, 0)) # Metal 1 to Metal 2 through Via 1
+
+# 2. Extract Devices (The Transistors)
+# ------------------------------------
+# Recognize a CMOS gate
+extract_devices(mos4("nmos"), { "SD" => active, "G" => poly, "B" => bulk })
+
+# 3. Compare
+# ----------
+compare

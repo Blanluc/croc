@@ -1,0 +1,41 @@
+# 1. Determine the input layout
+if $in_gds
+  # Use the layout from the command line variable
+  source($in_gds)
+elsif layout
+  # If no variable, use the layout currently open in the GUI
+  source(layout)
+else
+  # If nothing is open, stop and show an error
+  raise "No layout loaded! Open a GDS file first."
+end
+
+# 2. Determine the report output
+if $out_report
+  report("Croc DRC Report", $out_report)
+else
+  # In GUI mode, just show the markers in the browser
+  report("Croc DRC Report")
+end
+
+# 3. Your rules (Active, Poly, Gate, etc.)
+active = input(1, 0)
+poly   = input(5, 0)
+# ... etc
+
+# --- TILING FOR MEMORY EFFICIENCY ---
+# This processes the chip in 500um x 500um tiles.
+# It drastically reduces RAM usage.
+tiles(500.micron)
+tile_borders(5.micron)
+threads(2) # Matches a standard laptop/VM core count
+# ------------------------------------
+
+puts "Starting Tiled DRC..."
+
+active = input(1, 0)
+poly   = input(5, 0)
+gate   = poly & active
+
+gate.width(0.13.micron).output("Gate_Width", "Min Gate Width Violation")
+puts "Finished!"

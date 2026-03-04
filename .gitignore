@@ -1,3 +1,16 @@
-.bender
-tmp
+# KLayout & Tooling
+*.lyrdb
 *.log
+*.tmp
+*.bak
+host_is_*
+
+# CAD Results
+out/*.gds.gz
+!out/croc.gds.gz
+out/reports/
+out/tmp/
+
+# OS/System
+.DS_Store
+__pycache__/
