@@ -111,15 +111,20 @@ module cve2_alu #(
   logic [33:0] raw_sum;
   assign raw_sum = $unsigned(adder_in_a) + $unsigned(adder_in_b);
 
+  // 2. Decide what the FINAL output wire should hold
   always_comb begin
+    // Start with a default: the final wire carries the raw math
     adder_result_ext_o = raw_sum;
 
+    // Now, check for your special saturation condition
+    // We only want to saturate if we are doing our NEW instruction
     if (operator_i == ALU_ADD_SAT && raw_sum[33] == 1'b1) begin
-      adder_result_ext_o = '1;
+      adder_result_ext_o = '1; // Override with all 1s
     end
   end
 
   assign adder_result       = adder_result_ext_o[32:1];
+
   assign adder_result_o     = adder_result;
 
   

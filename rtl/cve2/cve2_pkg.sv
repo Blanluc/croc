@@ -70,6 +70,13 @@ package cve2_pkg;
   ////////////////////
 
   typedef enum logic [6:0] {
+
+    //***** ADDED *****
+
+    ALU_ADD_SAT //SATURATED ADDITION
+
+    //***** ADDED *****
+    
     // Arithmetics
     ALU_ADD,
     ALU_SUB,
