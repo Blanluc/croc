@@ -62,6 +62,10 @@ module cve2_alu #(
       // Adder OPs
       ALU_SUB,
 
+      // ADDED //
+      ALU_SUB_SAT,
+      ALU_SUB_SAT_U,
+
       // Comparator OPs
       ALU_EQ,   ALU_NE,
       ALU_GE,   ALU_GEU,
@@ -70,7 +74,7 @@ module cve2_alu #(
 
       // MinMax OPs (RV32B Ops)
       ALU_MIN,  ALU_MINU,
-      ALU_MAX,  ALU_MAXU: adder_op_b_negate = 1'b1;
+      ALU_MAX,  ALU_MAXU: adder_op_b_negate = 1'b1; //SO ALU SUB TRIGGRTS NEGATION
 
       // Address Calculation OPs (RV32B Ops)
       ALU_SH1ADD: if (RV32B != RV32BNone) adder_op_a_shift1 = 1'b1;
@@ -97,7 +101,7 @@ module cve2_alu #(
   always_comb begin
     unique case (1'b1)
       multdiv_sel_i:     adder_in_b = multdiv_operand_b_i;
-      adder_op_b_negate: adder_in_b = operand_b_neg;
+      adder_op_b_negate: adder_in_b = operand_b_neg; //IF adder_op_b_negate => NEGATIVE OPERAND
       default:           adder_in_b = {operand_b_i, 1'b0};
     endcase
   end
@@ -106,18 +110,52 @@ module cve2_alu #(
 
   //assign adder_result_ext_o = $unsigned(adder_in_a) + $unsigned(adder_in_b);
 
-  //ADDED 
-  // SATURATED ADDER
-  logic [33:0] raw_sum;
-  assign raw_sum = $unsigned(adder_in_a) + $unsigned(adder_in_b);
-
+  //***** ADDED *****
+  // SIGNED/UNSIGNED SATURATED ADD/SUB
   always_comb begin
+
     adder_result_ext_o = raw_sum;
 
-    if (operator_i == ALU_ADD_SAT && raw_sum[33] == 1'b1) begin
-      adder_result_ext_o = '1;
-    end
+    unique case (operator_i)
+    
+      ALU_ADD_SAT: begin
+        if(adder_in_a[32] == 0 && adder_in_b[32] == 0 && raw_sum[32] == 1'b1) begin
+          adder_result_ext_o[32] = 0;
+          adder_result_ext_o[31:0] = '1;
+        end
+        if(adder_in_a[32] == 1 && adder_in_b[32] == 1 && raw_sum[32] == 1'b0) begin
+          adder_result_ext_o[32] = 1;
+          adder_result_ext_o[31:0] = '0;
+        end
+      end
+
+      ALU_SUB_SAT: begin
+        if(raw_sum[32] == 1'b0 && adder_in_a[32]== 1'b1 && adder_in_b[32]== 1'b1) begin
+          adder_result_ext_o[32] = 1;
+          adder_result_ext_o[31:0] = '0;
+        end
+        if(raw_sum[32] == 1'b1 && adder_in_a[32]== 1'b0 && adder_in_b[32]== 1'b0) begin
+          adder_result_ext_o[32] = 0;
+          adder_result_ext_o[31:0] = '1;
+        end
+      end
+
+      ALU_ADD_SAT_U: begin
+        if (raw_sum[33] == 1'b1) begin
+          adder_result_ext_o[32:1] = '1;
+        end
+      end
+
+      ALU_SUB_SAT_U: begin
+        if (raw_sum[33] == 1'b0) begin
+          adder_result_ext_o[32:1] = '0;
+        end
+      end
+
+      default: ;
+    endcase
   end
+  //****** END ******
 
   assign adder_result       = adder_result_ext_o[32:1];
   assign adder_result_o     = adder_result;
@@ -1340,8 +1378,11 @@ module cve2_alu #(
     //***** ADDED *****
 
       ALU_ADD_SAT, //SATURATED ADDITION
+      ALU_ADD_SAT, //SATURATED SUBSTRACTION
+      ALU_ADD_SAT_U, //UNSIGNED SATURATED ADDITION
+      ALU_ADD_SAT_U, //UNSIGNED SATURATED SUBSTRACTION
 
-    //***** ADDED *****
+    //****** END ******
 
       // Bitwise Logic Operations (negate: RV32B)
       ALU_XOR,  ALU_XNOR,
