@@ -464,7 +464,13 @@ module cve2_decoder #(
             {7'b000_0000, 3'b111},
             {7'b000_0000, 3'b001},
             {7'b000_0000, 3'b101},
-            {7'b010_0000, 3'b101}: illegal_insn = 1'b0;
+            {7'b010_0000, 3'b101}, // illegal_insn = 1'b0;
+
+            //ADDED
+            {7'b000_1000, 3'b000}, // add_sat (Signed)
+            {7'b010_1000, 3'b000}, // sub_sat (Signed)
+            {7'b000_1000, 3'b001}, // add_sat_u (Unsigned)
+            {7'b010_1000, 3'b001}: illegal_insn = 1'b0; // sub_sat_u (Unsigned)
 
             // RV32B zba
             {7'b001_0000, 3'b010}, // sh1add
@@ -975,10 +981,24 @@ module cve2_decoder #(
             endcase
           end
         end else begin
+          // print out the relevant bits when we evaluate ALU op
+          //$display("[DECODER] instr_alu=%h, top7=%b, funct3=%b", instr_alu,
+              //     instr_alu[31:25], instr_alu[14:12]);
           unique case ({instr_alu[31:25], instr_alu[14:12]})
-            // RV32I ALU operations
+            // RV32I ALU operations //HEREE
             {7'b000_0000, 3'b000}: alu_operator_o = ALU_ADD;   // Add
             {7'b010_0000, 3'b000}: alu_operator_o = ALU_SUB;   // Sub
+
+            //ADDED
+            {7'b000_1000, 3'b000}: alu_operator_o = ALU_ADD_SAT;// add_sat (Signed)
+            {7'b010_1000, 3'b000}: alu_operator_o = ALU_SUB_SAT; // sub_sat (Signed)
+            {7'b000_1000, 3'b001}: alu_operator_o = ALU_ADD_SAT_U;// add_sat_u (Unsigned)
+            {7'b010_1000, 3'b001}: alu_operator_o = ALU_SUB_SAT_U; // sub_sat_u (Unsigned)
+
+
+
+
+
             {7'b000_0000, 3'b010}: alu_operator_o = ALU_SLT;   // Set Lower Than
             {7'b000_0000, 3'b011}: alu_operator_o = ALU_SLTU;  // Set Lower Than Unsigned
             {7'b000_0000, 3'b100}: alu_operator_o = ALU_XOR;   // Xor
@@ -987,7 +1007,7 @@ module cve2_decoder #(
             {7'b000_0000, 3'b001}: alu_operator_o = ALU_SLL;   // Shift Left Logical
             {7'b000_0000, 3'b101}: alu_operator_o = ALU_SRL;   // Shift Right Logical
             {7'b010_0000, 3'b101}: alu_operator_o = ALU_SRA;   // Shift Right Arithmetic
-
+            
             // RV32B ALU Operations
             {7'b011_0000, 3'b001}: begin
               if (RV32B != RV32BNone) begin
@@ -1112,6 +1132,7 @@ module cve2_decoder #(
               alu_operator_o = ALU_ADD;
               div_sel_o      = (RV32M == RV32MNone) ? 1'b0 : 1'b1;
             end
+            
 
             default: ;
           endcase

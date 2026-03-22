@@ -70,6 +70,10 @@ package cve2_pkg;
   ////////////////////
 
   typedef enum logic [6:0] {
+    
+    // Arithmetics
+    ALU_ADD,
+    ALU_SUB,
 
     //***** ADDED *****
 
@@ -79,10 +83,6 @@ package cve2_pkg;
     ALU_SUB_SAT_U, //UNSIGNED SATURATED SUBSTRACTION
 
     //***** ADDED *****
-    
-    // Arithmetics
-    ALU_ADD,
-    ALU_SUB,
 
     // Logics
     ALU_XOR,
@@ -186,6 +186,9 @@ package cve2_pkg;
     ALU_CRC32C_H,
     ALU_CRC32_W,
     ALU_CRC32C_W
+
+
+
   } alu_op_e;
 
   typedef enum logic [1:0] {

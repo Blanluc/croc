@@ -12,43 +12,19 @@ ENTRY(_start)
 
 MEMORY 
 {
-   SRAM (rwxail) : ORIGIN = 0x10000000, LENGTH = 4K
+   SRAM (rwxail) : ORIGIN = 0x10000000, LENGTH = 2K
 }
 
 SECTIONS
 {
   /DISCARD/ : { *(.riscv.attributes) *(.comment) }
 
-  .vectors : ALIGN(4) {
-      *(.vectors)
-  } >SRAM
+  .text._start 0x10000000 : { *(.text._start) } >SRAM
+  .text : { *(.text) *(.text.*) } >SRAM
+  .misc : { *(.sdata) *(.*) } >SRAM
+  
+  __global_pointer$ = ADDR(.misc)  + SIZEOF(.misc) / 2; 
+  __stack_pointer$  = ORIGIN(SRAM) + LENGTH(SRAM);
 
-  .text._start : {
-      *(.text._start)
-  } >SRAM
-
-  .misc : ALIGN(4) {
-      *(.sdata)
-      *(.sbss)
-      *(.*data*)
-      *(.*bss*)
-      *(COMMON)
-  } >SRAM
-
-  .text : ALIGN(4) {
-      *(.text)
-      *(.text.*)
-  } >SRAM
+  status  = 0x03000008;
 }
-
-/* Global absolute symbols */
-PROVIDE(__global_pointer$ = ADDR(.misc) + SIZEOF(.misc)/2);
-PROVIDE(__stack_pointer$ = ORIGIN(SRAM) + LENGTH(SRAM));
-
-/* Bootrom symbols (fixed addresses) */
-PROVIDE(_eoc = 0x02000100);
-PROVIDE(_trap_handler_wrapper = 0x02000200);
-PROVIDE(_trap_exit = 0x02000300);
-
-/* SoC register symbols */
-PROVIDE(corestatus = 0x03000008);

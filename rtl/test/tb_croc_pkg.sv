@@ -9,8 +9,8 @@
 package tb_croc_pkg;
 
   // Clocks
-  localparam realtime ClkPeriodSys  = 50ns;    // 20 MHz
-  localparam realtime ClkPeriodJtag = 50ns;    // 20 MHz
+  localparam realtime ClkPeriodSys  = 100ns;    // 20 MHz
+  localparam realtime ClkPeriodJtag = 100ns;    // 20 MHz
   localparam realtime ClkPeriodRef  = 30518ns; // 32 KiHz
 
   // Number of clock cycles the reset is applied 

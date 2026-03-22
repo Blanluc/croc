@@ -9,7 +9,7 @@
 #include "util.h"
 #include "config.h"
 
-#define UART_DIVISOR(freq, baud) ((freq) / ((baud) << 4)) // Divisor calculation
+#define UART_DIVISOR(freq, baud) ((freq) / ((baud) << 4))  // Divisor calculation
 
 void uart_init() {
     const uint16_t divisor = UART_DIVISOR(UART_FREQ, UART_BAUD); // Calculate from provided config
@@ -22,18 +22,6 @@ void uart_init() {
     *reg8(UART_BASE_ADDR, UART_LINE_CONTROL_REG_OFFSET) = 0x03;  // 8 bits, no parity, one stop bit
     *reg8(UART_BASE_ADDR, UART_FIFO_CONTROL_REG_OFFSET) = 0xC7;  // Enable & clear FIFO, 14B threshold
     *reg8(UART_BASE_ADDR, UART_MODEM_CONTROL_REG_OFFSET) = 0x20; // Autoflow mode
-}
-
-void uart_loopback_enable() {
-    uart_write_flush();
-    uint8_t mcr = *reg8(UART_BASE_ADDR, UART_MODEM_CONTROL_REG_OFFSET);
-    *reg8(UART_BASE_ADDR, UART_MODEM_CONTROL_REG_OFFSET) = mcr | (1 << 4);
-}
-
-void uart_loopback_disable() {
-    uart_write_flush();
-    uint8_t mcr = *reg8(UART_BASE_ADDR, UART_MODEM_CONTROL_REG_OFFSET);
-    *reg8(UART_BASE_ADDR, UART_MODEM_CONTROL_REG_OFFSET) = mcr & ~(1 << 4);
 }
 
 int uart_read_ready() {
