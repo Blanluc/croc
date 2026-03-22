@@ -30,6 +30,10 @@ module cve2_alu #(
   //output logic [33:0]       raw_sum, //added
   //DO NOT DO THS, BREAKS EVERYTHING!
 
+  //IMPORTANT:KEEP TRACK OF THIS / I dont think i even need it
+  output logic [31:0]       SIMD_result_o,
+  //output logic [31:0]       SIMD_result_ext_o,
+
   output logic [31:0]       result_o,
   output logic              comparison_result_o,
   output logic              is_equal_result_o
@@ -57,9 +61,9 @@ module cve2_alu #(
 
   always_comb begin
     // debug prints to observe which operator is fed to the adder
-    if (operator_i == ALU_ADD_SAT)           // $display("[ALU] operator_i = ADD_SAT");
-    if (operator_i == ALU_SUB)               // $display("[ALU] operator_i = SUB");
-    if (operator_i == ALU_SUB_SAT)           // $display("[ALU] operator_i = SUB_SAT");
+    //if (operator_i == ALU_ADD_SAT)           // $display("[ALU] operator_i = ADD_SAT");
+    //if (operator_i == ALU_SUB)               // $display("[ALU] operator_i = SUB");
+    //if (operator_i == ALU_SUB_SAT)           // $display("[ALU] operator_i = SUB_SAT");
     //if (operator_i == ALU_ADD)                $display("[ALU] operator_i = ADD");
 
     adder_op_a_shift1 = 1'b0;
@@ -168,6 +172,37 @@ module cve2_alu #(
   assign adder_result_o     = adder_result;
 
   // END
+
+  ///////////////
+  // SIMD DOTP //
+  ///////////////
+
+  logic [31:0] SIMD_dotp_result;  // internal signal
+  logic [31:0] temp; 
+
+  //CAREFUL, u can mult in parallel. but what about the acc
+  genvar k;
+  generate 
+    for (k = 0; k < 4; k++) begin
+      always@(posedge clk) begin
+        SIMD_dotp_result[k*8:(k*8)+7] = a[k*8:(k*8)+7] * b[k*8:(k*8)+7];
+        // 0,7 ; 8,15 ; 16,23 ...
+      end
+    end
+  endgenerate
+
+  //ACC
+	integer i;
+  always_comb begin
+    assing temp=SIMD_dotp_result;
+    for (i = 0; i < 4; i = i + 1) begin
+			$display ("Current loop#%0d ", i);
+      SIMD_dotp_result[0:(k*8)+7] = temp[k*8:(k*8)+7];
+		end
+
+  end
+
+  assign SIMD_result_o = SIMD_dotp_result;
 
   
   ////////////////

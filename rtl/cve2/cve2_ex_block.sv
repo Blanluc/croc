@@ -108,6 +108,7 @@ module cve2_ex_block #(
     .multdiv_sel_i      (multdiv_sel),
     .adder_result_o     (alu_adder_result_ex_o),
     .adder_result_ext_o (alu_adder_result_ext),
+    //IMPORTANT : KEEP TRACK OF THIS
     .result_o           (alu_result),
     .comparison_result_o(alu_cmp_result),
     .is_equal_result_o  (alu_is_equal_result)
