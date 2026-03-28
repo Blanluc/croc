@@ -178,14 +178,15 @@ module cve2_alu #(
   ///////////////
 
   logic [31:0] SIMD_dotp_result;  // internal signal
-  logic [31:0] temp; 
+  logic [31:0] mult; 
 
   //CAREFUL, u can mult in parallel. but what about the acc
+  //  32/4=8
   genvar k;
   generate 
     for (k = 0; k < 4; k++) begin
       always@(posedge clk) begin
-        SIMD_dotp_result[k*8:(k*8)+7] = a[k*8:(k*8)+7] * b[k*8:(k*8)+7];
+        mult[(k*8)+:8] <= operand_a_i[(k*8)+:8] * operand_b_i[(k*8)+:8];
         // 0,7 ; 8,15 ; 16,23 ...
       end
     end
@@ -194,10 +195,11 @@ module cve2_alu #(
   //ACC
 	integer i;
   always_comb begin
-    assing temp=SIMD_dotp_result;
+    SIMD_dotp_result = 32'd0; //very important, otherwise output undefined
+    //temp=SIMD_dotp_result;
     for (i = 0; i < 4; i = i + 1) begin
 			$display ("Current loop#%0d ", i);
-      SIMD_dotp_result[0:(k*8)+7] = temp[k*8:(k*8)+7];
+      SIMD_dotp_result = SIMD_dotp_result +mult[(i*8) +:8];
 		end
 
   end
