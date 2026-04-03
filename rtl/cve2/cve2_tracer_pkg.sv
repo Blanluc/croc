@@ -53,6 +53,9 @@ package cve2_tracer_pkg;
   parameter logic [31:0] INSN_ADD_SAT_U = { 7'b0001000, 10'h?, 3'b001, 5'h?, {OPCODE_OP} };
   parameter logic [31:0] INSN_SUB_SAT_U = { 7'b0101000, 10'h?, 3'b001, 5'h?, {OPCODE_OP} };
 
+  //ADDED SIMD
+  parameter logic [31:0] SIMD_DOTP   = { 7'b0111000, 10'h?, 3'b000, 5'h?, {OPCODE_OP} };
+
   // SYSTEM
   parameter logic [31:0] INSN_CSRRW   = { 17'h?,             3'b001, 5'h?, {OPCODE_SYSTEM} };
   parameter logic [31:0] INSN_CSRRS   = { 17'h?,             3'b010, 5'h?, {OPCODE_SYSTEM} };

@@ -466,6 +466,9 @@ module cve2_decoder #(
             {7'b000_0000, 3'b101},
             {7'b010_0000, 3'b101}, // illegal_insn = 1'b0;
 
+            //ADDED SIMD
+            {7'b011_1000, 3'b000}, // simd_dotp
+
             //ADDED
             {7'b000_1000, 3'b000}, // add_sat (Signed)
             {7'b010_1000, 3'b000}, // sub_sat (Signed)
@@ -994,6 +997,8 @@ module cve2_decoder #(
             {7'b010_1000, 3'b000}: alu_operator_o = ALU_SUB_SAT; // sub_sat (Signed)
             {7'b000_1000, 3'b001}: alu_operator_o = ALU_ADD_SAT_U;// add_sat_u (Unsigned)
             {7'b010_1000, 3'b001}: alu_operator_o = ALU_SUB_SAT_U; // sub_sat_u (Unsigned)
+
+            {7'b011_1000, 3'b000}: alu_operator_o = SIMD_DOTP; // simd_dotp
 
 
 

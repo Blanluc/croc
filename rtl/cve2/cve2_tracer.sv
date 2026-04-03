@@ -886,6 +886,9 @@ module cve2_tracer (
         INSN_ADD_SAT_U:  decode_r_insn("add_sat_u");
         INSN_SUB_SAT_U:  decode_r_insn("sub_sat_u");
 
+        // ADDED SIMD
+        SIMD_DOTP: decode_r_insn("simd_dotp");
+
         INSN_SLL:        decode_r_insn("sll");
         INSN_SLT:        decode_r_insn("slt");
         INSN_SLTU:       decode_r_insn("sltu");

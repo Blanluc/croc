@@ -48,7 +48,7 @@ module cve2_ex_block #(
 
   import cve2_pkg::*;
 
-  logic [31:0] alu_result, multdiv_result;
+  logic [31:0] alu_result, multdiv_result, alu_SIMD_dotp_result; //ADDED
 
   logic [32:0] multdiv_alu_operand_b, multdiv_alu_operand_a;
   logic [33:0] alu_adder_result_ext;
@@ -109,7 +109,8 @@ module cve2_ex_block #(
     .adder_result_o     (alu_adder_result_ex_o),
     .adder_result_ext_o (alu_adder_result_ext),
     //IMPORTANT : KEEP TRACK OF THIS
-    .adder_result_o     (alu_adder_result_ex_o),
+    .SIMD_result_o (alu_SIMD_dotp_result),
+    //.adder_result_o     (alu_adder_result_ex_o),
     .result_o           (alu_result),
     .comparison_result_o(alu_cmp_result),
     .is_equal_result_o  (alu_is_equal_result)

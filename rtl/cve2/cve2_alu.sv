@@ -177,31 +177,31 @@ module cve2_alu #(
   // SIMD DOTP //
   ///////////////
 
+  //For now dont neet to select since only 1 op
+
   logic [31:0] SIMD_dotp_result;  // internal signal
-  logic [31:0] mult; 
+  //logic [31:0] mult; 
 
   //CAREFUL, u can mult in parallel. but what about the acc
   //  32/4=8
+  // (8bit * 8bit = 16bit)
+  logic [15:0] products [4]; 
+
   genvar k;
-  generate 
-    for (k = 0; k < 4; k++) begin
-      always@(posedge clk) begin
-        mult[(k*8)+:8] <= operand_a_i[(k*8)+:8] * operand_b_i[(k*8)+:8];
-        // 0,7 ; 8,15 ; 16,23 ...
-      end
+  generate //creates multiple instances
+    for (k = 0; k < 4; k = k + 1) begin : gen_mult
+      // creates 4 parallel hardware multipliers
+      assign products[k] = 16'(operand_a_i[k*8 +: 8]) * 16'(operand_b_i[k*8 +: 8]);
     end
   endgenerate
 
-  //ACC
-	integer i;
-  always_comb begin
-    SIMD_dotp_result = 32'd0; //very important, otherwise output undefined
-    //temp=SIMD_dotp_result;
-    for (i = 0; i < 4; i = i + 1) begin
-			$display ("Current loop#%0d ", i);
-      SIMD_dotp_result = SIMD_dotp_result +mult[(i*8) +:8];
-		end
+  //Accumulator
 
+  always_comb begin
+    SIMD_dotp_result = 32'd0; //Set to 0
+    for (int i = 0; i < 4; i++) begin
+      SIMD_dotp_result = SIMD_dotp_result + 32'(products[i]);
+    end
   end
 
   assign SIMD_result_o = SIMD_dotp_result;
@@ -1443,6 +1443,10 @@ module cve2_alu #(
       // RV32B
       ALU_SH1ADD, ALU_SH2ADD,
       ALU_SH3ADD: result_o = adder_result;
+
+      // ADDED 
+      // SIMD Operations
+      SIMD_DOTP: result_o = SIMD_dotp_result;
 
       // Shift Operations
       ALU_SLL,  ALU_SRL,
