@@ -124,51 +124,45 @@ module cve2_alu #(
 
   //***** ADDED *****
   logic [33:0] raw_sum;
-  logic [33:0] sat_result;  // internal signal
+  logic [31:0] sat_result;
 
   assign raw_sum = $unsigned(adder_in_a) + $unsigned(adder_in_b);
 
-  always_comb begin
-      sat_result = raw_sum; // default: pass through
+  logic add_overflow_pos, add_overflow_neg;
+  logic sub_overflow_pos, sub_overflow_neg;
+  //Ex: if a=0111 (biggest positive) and b=0001 => raw_sum=1000 : 1 & 1 & 1 = 1 => Overflow!
+  assign add_overflow_pos = ~operand_a_i[31] & ~operand_b_i[31] &  raw_sum[31];
+  //Ex: if a=1111 (smallest negative and b=1000 => raw_sum=10111 : Overflow!
+  assign add_overflow_neg =  operand_a_i[31] &  operand_b_i[31] & ~raw_sum[31];
 
+  //Ex: if a=0001 and b=1001 => raw_sum=0001+=0111 =01000 : 1 & 1 & 1 = 1 => Overflow!
+  assign sub_overflow_pos = ~operand_a_i[31] &  operand_b_i[31] &  raw_sum[32];
+  //Ex: if a=1000 and b=0001 => raw_sum=1000+=1111 =10111 : 1 & 1 & 1 = 1 => Overflow!
+  assign sub_overflow_neg =  operand_a_i[31] & ~operand_b_i[31] & ~raw_sum[32];
+
+  always_comb begin //Just a select
+      sat_result = raw_sum[32:1];
       unique case (operator_i)
-
           ALU_ADD_SAT: begin
-              logic overflow_pos, overflow_neg;
-              overflow_pos = ~operand_a_i[31] & ~operand_b_i[31] &  raw_sum[32];
-              overflow_neg =  operand_a_i[31] &  operand_b_i[31] & ~raw_sum[32];
-              if (overflow_pos)
-                  sat_result[32:1] = 32'h7fff_ffff;
-              else if (overflow_neg)
-                  sat_result[32:1] = 32'h8000_0000;
+              if (add_overflow_pos)      sat_result = 32'h7fff_ffff;
+              else if (add_overflow_neg) sat_result = 32'h8000_0000;
           end
-
           ALU_SUB_SAT: begin
-              logic overflow_pos, overflow_neg;
-              overflow_pos = ~operand_a_i[31] &  operand_b_i[31] &  raw_sum[32];
-              overflow_neg =  operand_a_i[31] & ~operand_b_i[31] & ~raw_sum[32];
-              if (overflow_pos)
-                  sat_result[32:1] = 32'h7fff_ffff;
-              else if (overflow_neg)
-                  sat_result[32:1] = 32'h8000_0000;
+              if (sub_overflow_pos)      sat_result = 32'h7fff_ffff;
+              else if (sub_overflow_neg) sat_result = 32'h8000_0000;
           end
-
           ALU_ADD_SAT_U: begin
-              if (raw_sum[33])
-                  sat_result[32:1] = 32'hffff_ffff;
+              if (raw_sum[33])           sat_result = 32'hffff_ffff;
           end
-
           ALU_SUB_SAT_U: begin
-              if (!raw_sum[33])
-                  sat_result[32:1] = 32'h0000_0000;
+              if (!raw_sum[33])          sat_result = 32'h0000_0000;
           end
-
           default: ;
       endcase
   end
 
-  assign adder_result_ext_o = sat_result;
-  assign adder_result       = sat_result[32:1];
+  assign adder_result_ext_o = raw_sum;
+  assign adder_result       = sat_result;
   assign adder_result_o     = adder_result;
 
   // END
