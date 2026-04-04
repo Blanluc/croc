@@ -19,6 +19,32 @@ int32_t call_simd_dotp(int32_t a, int32_t b) {
 
     return result;
 }
+
+int32_t call_simd_add(int32_t a, int32_t b) {
+    int32_t result;
+
+    asm volatile (
+        ".insn r 0x33,1, 0x38, %0, %1, %2"
+        : "=r" (result)          // %0: Output (rd)
+        : "r" (a), "r" (b)       // %1: rs1, %2: rs2
+    );
+
+    return result;
+}
+
+int32_t call_simd_sub(int32_t a, int32_t b) {
+    int32_t result;
+
+    asm volatile (
+        ".insn r 0x33, 2, 0x38, %0, %1, %2"
+        : "=r" (result)          // %0: Output (rd)
+        : "r" (a), "r" (b)       // %1: rs1, %2: rs2
+    );
+
+    return result;
+}
+
+
 //01010101 = 1+4+16+64 = 85
 int main() {
     uart_init();
@@ -31,6 +57,19 @@ int main() {
  
     printf("Result: %x\n", result);
     printf("Expected result is 4\n");
+
+    uint32_t result2;
+    printf("--- SIMD ADD Test ---\n");
+    result2 = call_simd_add(a,b);
+    printf("Result: %x\n", result2);
+    printf("Expected result is idk\n");
+
+    printf("--- SIMD SUB Test ---\n");
+    result2 = call_simd_sub(a,b);
+    printf("Result: %x\n", result2);
+    printf("Expected result is idk\n");
+
+    
 
     uart_write_flush();
 

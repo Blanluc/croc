@@ -86,6 +86,8 @@ package cve2_pkg;
 
     // ADDED SIMD
     SIMD_DOTP,
+    SIMD_ADD,
+    SIMD_SUB,
 
     // Logics
     ALU_XOR,

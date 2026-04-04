@@ -168,7 +168,7 @@ module cve2_alu #(
   // END
 
   ///////////////
-  // SIMD DOTP //
+  //   SIMD    //
   ///////////////
 
   //For now dont neet to select since only 1 op
@@ -198,7 +198,50 @@ module cve2_alu #(
     end
   end
 
-  assign SIMD_result_o = SIMD_dotp_result;
+  //do the other simd ops and do a select in the end
+
+  logic [31:0] SIMD_add_result;  // internal signal
+  
+  //logic [15:0] sums[4]; 
+
+  //genvar i;
+  generate //creates multiple instances
+    for (k = 0; k < 4; k = k + 1) begin : gen_add
+      // creates 4 parallel hardware sums
+      assign SIMD_add_result[k*8 +: 8] = 8'(operand_a_i[k*8 +: 8]) + 8'(operand_b_i[k*8 +: 8]);
+    end
+  endgenerate
+
+  logic [31:0] SIMD_sub_result;  // internal signal
+  
+  //logic [15:0] subs[4]; 
+
+  //genvar k;
+  generate //creates multiple instances
+    for (k = 0; k < 4; k = k + 1) begin : gen_sub
+      // creates 4 parallel hardware subs
+      assign SIMD_sub_result[k*8 +: 8] = (operand_a_i[k*8 +: 8]) - (operand_b_i[k*8 +: 8]);
+    end
+  endgenerate
+
+  logic [31:0] SIMD_result;
+
+  always_comb begin //Just a select
+      SIMD_result = 32'h0000_0000;
+      unique case (operator_i)
+          SIMD_DOTP: begin
+               SIMD_result=SIMD_dotp_result;
+          end
+          SIMD_ADD: begin
+               SIMD_result=SIMD_add_result;
+          end
+          SIMD_SUB: begin
+               SIMD_result=SIMD_sub_result;
+          end
+          default:;
+      endcase
+  end
+  assign SIMD_result_o = SIMD_result;
 
   
   ////////////////
@@ -1440,7 +1483,9 @@ module cve2_alu #(
 
       // ADDED 
       // SIMD Operations
-      SIMD_DOTP: result_o = SIMD_dotp_result;
+      SIMD_ADD,
+      SIMD_SUB,
+      SIMD_DOTP: result_o = SIMD_result;
 
       // Shift Operations
       ALU_SLL,  ALU_SRL,

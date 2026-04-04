@@ -888,6 +888,8 @@ module cve2_tracer (
 
         // ADDED SIMD
         SIMD_DOTP: decode_r_insn("simd_dotp");
+        SIMD_ADD: decode_r_insn("simd_add");
+        SIMD_SUB: decode_r_insn("simd_sub");
 
         INSN_SLL:        decode_r_insn("sll");
         INSN_SLT:        decode_r_insn("slt");

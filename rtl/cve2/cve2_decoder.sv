@@ -468,6 +468,8 @@ module cve2_decoder #(
 
             //ADDED SIMD
             {7'b011_1000, 3'b000}, // simd_dotp
+            {7'b011_1000, 3'b001}, // simd_add
+            {7'b011_1000, 3'b010}, // simd_sub
 
             //ADDED
             {7'b000_1000, 3'b000}, // add_sat (Signed)
@@ -999,10 +1001,8 @@ module cve2_decoder #(
             {7'b010_1000, 3'b001}: alu_operator_o = ALU_SUB_SAT_U; // sub_sat_u (Unsigned)
 
             {7'b011_1000, 3'b000}: alu_operator_o = SIMD_DOTP; // simd_dotp
-
-
-
-
+            {7'b011_1000, 3'b001}: alu_operator_o = SIMD_ADD; // simd_dotp
+            {7'b011_1000, 3'b010}: alu_operator_o = SIMD_SUB; // simd_dotp
 
             {7'b000_0000, 3'b010}: alu_operator_o = ALU_SLT;   // Set Lower Than
             {7'b000_0000, 3'b011}: alu_operator_o = ALU_SLTU;  // Set Lower Than Unsigned
